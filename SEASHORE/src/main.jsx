@@ -79,10 +79,10 @@ function App(){
  const ensure=async()=>{await init();if(ctx.current.state==='suspended')await ctx.current.resume()};
  function delaySeconds(note,tempo){const beats=note==='1/4'?1:note==='1/8'?.5:note==='1/16'?.25:note==='1/32'?.125:1;return Math.max(.03,Math.min(1.5,(60/tempo)*beats))}
  function makeReverbImpulse(c,type){
- const seconds=type==='plate'?2.65:type==='spring'?1.75:1.25;
- const decay=type==='plate'?2.25:type==='spring'?3.15:4.6;
+ const seconds=type==='spring'?1.75:1.25;
+ const decay=type==='spring'?3.15:4.6;
  const len=Math.floor(c.sampleRate*seconds),b=c.createBuffer(2,len,c.sampleRate);
- const taps=type==='room'?[.008,.017,.029,.043,.061]:type==='plate'?[.011,.019,.027,.036,.048,.063,.081,.104]:[.014,.031,.052,.079,.113,.151];
+ const taps=type==='room'?[.008,.017,.029,.043,.061]:[.014,.031,.052,.079,.113,.151];
  for(let ch=0;ch<2;ch++){
   const d=b.getChannelData(ch);
   for(let i=0;i<len;i++){
@@ -90,12 +90,11 @@ function App(){
    let early=0;
    for(let k=0;k<taps.length;k++){
     const offset=Math.floor(taps[k]*c.sampleRate)+(ch?Math.floor(k*13):0);
-    if(Math.abs(i-offset)<3) early+=(1-Math.abs(i-offset)/3)*(type==='plate'?.17:type==='room'?.24:.12)*(1-k/taps.length);
+    if(Math.abs(i-offset)<3) early+=(1-Math.abs(i-offset)/3)*(type==='room'?.24:.12)*(1-k/taps.length);
    }
    let body=Math.random()*2-1;
-   if(type==='plate') body=(body*.68+Math.sin(i*.071)*.20+Math.sin(i*.113)*.12);
    if(type==='spring') body=(body*.56+Math.sin(i*.047+Math.sin(i*.0007)*2)*.34+Math.sin(i*.091)*.10);
-   d[i]=(body*env+early)*(type==='plate'?.42:type==='spring'?.36:.32);
+   d[i]=(body*env+early)*(type==='spring'?.36:.32);
   }
  }
  return b;
@@ -158,7 +157,7 @@ function makeDrive(amount){const n=44100,curve=new Float32Array(n),k=1+amount*0.
   <div className="fx-control"><div><span>LOW-PASS FILTER</span><b>{fx.filter}%</b></div><input className="wide-slider" type="range" min="0" max="100" value={fx.filter} onChange={e=>setFx({...fx,filter:+e.target.value})}/></div>
   </div></div>
   <div className="dsp-group"><div className="dsp-group-title">REVERB</div>
-  <div className="fx-control"><div><span>TYPE</span></div><select className="dsp-select" value={fx.reverbType} onChange={e=>setFx({...fx,reverbType:e.target.value})}><option value="room">Room</option><option value="plate">Plate</option><option value="spring">Spring</option></select></div>
+  <div className="fx-control"><div><span>TYPE</span></div><select className="dsp-select" value={fx.reverbType} onChange={e=>setFx({...fx,reverbType:e.target.value})}><option value="room">Room</option><option value="spring">Spring</option></select></div>
   <div className="fx-control"><div><span>AMOUNT</span><b>{fx.reverb}%</b></div><input className="wide-slider" type="range" min="0" max="100" value={fx.reverb} onChange={e=>setFx({...fx,reverb:+e.target.value})}/></div>
   </div>
   <div className="dsp-group"><div className="dsp-group-title">DELAY</div>
