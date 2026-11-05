@@ -125,3 +125,16 @@ main { width:100%; }
 .range-ends{display:flex;justify-content:space-between;color:#91b4b9;font:8px 'DM Mono';margin-top:3px}
 .effects .fx-note{line-height:1.55}
 @media(max-width:620px){.dsp-group{padding:11px}.dsp-group-head{align-items:flex-start}.dsp-group-head small{max-width:48%}}
+
+/* Compact master-pitch dial and simplified DSP surface */
+.pitch-dial{width:68px;min-width:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#efcfd0}
+.pitch-dial>label,.pitch-dial>small{font:7px 'DM Mono';letter-spacing:.09em;text-align:center;color:#a9c8cb}
+.pitch-dial-face{width:54px;height:54px;border:1px solid #a9c8cb88;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle at 50% 45%,#386878,#173746);box-shadow:inset 0 1px 5px #071d28}
+.pitch-dial-face:before{content:"";position:absolute;width:2px;height:8px;top:5px;left:calc(50% - 1px);background:#efcfd0;border-radius:2px;transform:rotate(var(--dial-angle, -90deg));transform-origin:1px 22px}
+.pitch-dial-face input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
+.pitch-dial-face strong{font:12px 'DM Mono';color:#f4dddd;pointer-events:none}
+.dsp-controls{display:grid;gap:13px}
+.dsp-subhead{font:9px 'DM Mono';letter-spacing:.16em;color:#efcfd0;padding-top:8px;border-top:1px solid #ffffff22}
+.dsp-select{width:100%;min-width:0;background:#214b5a;color:#e6edef;border:1px solid #91b8bf66;border-radius:5px;padding:10px 12px;font:12px inherit}
+.effects .fx-note{line-height:1.5;margin-top:14px}
+@media(max-width:620px){.pitch-dial{width:64px;min-width:64px}.pitch-dial-face{width:50px;height:50px}.transport-left{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 64px!important;align-items:stretch}.transport-left .random{min-width:0}}
