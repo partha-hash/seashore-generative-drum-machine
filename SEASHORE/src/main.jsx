@@ -31,31 +31,31 @@ function makePattern(genre, seed=Math.random){
  return p;
 }
 function App(){
- const [genre,setGenre]=useState('House'),[bpm,setBpm]=useState(124),[pattern,setPattern]=useState(()=>makePattern('House')),[playing,setPlaying]=useState(false),[step,setStep]=useState(-1),[selected,setSelected]=useState(0),[master,setMaster]=useState(78),[seaLevel,setSeaLevel]=useState(24),[seaMist,setSeaMist]=useState(42),[seaPlaying,setSeaPlaying]=useState(false),[shimmer,setShimmer]=useState(18),[seaName]=useState('BBC Seaside · 29.7 sec'),[fx,setFx]=useState({pitch:0,bitcrush:0,compression:10,reverb:0,reverbType:'room',delay:0,delayType:'digital',delayNote:'1/8',filter:100,drive:5}),[swing,setSwing]=useState(8),[volume,setVolume]=useState(Array(16).fill(78));
+ const [genre,setGenre]=useState('House'),[bpm,setBpm]=useState(124),[pattern,setPattern]=useState(()=>makePattern('House')),[playing,setPlaying]=useState(false),[step,setStep]=useState(-1),[selected,setSelected]=useState(0),[master,setMaster]=useState(78),[seaLevel,setSeaLevel]=useState(24),[seaMist,setSeaMist]=useState(42),[seaPlaying,setSeaPlaying]=useState(false),[shimmer,setShimmer]=useState(18),[seaName]=useState('BBC Seaside · 29.7 sec'),[fx,setFx]=useState({pitch:0,bitcrush:0,compression:10,reverb:0,reverbType:'spring',delay:0,delayType:'analog',delayNote:'1/8',filter:100,drive:5}),[swing,setSwing]=useState(8),[volume,setVolume]=useState(Array(16).fill(78));
  const ctx=useRef(null), buffers=useRef({}), nodes=useRef(null), timer=useRef(null), nextStep=useRef(0), nextTime=useRef(0), playingRef=useRef(false), patternRef=useRef(pattern), bpmRef=useRef(bpm), fxRef=useRef(fx), seaRef=useRef(null), seaSource=useRef(null), seaGain=useRef(null), seaPlayingRef=useRef(false), ambienceOut=useRef(null), seaFilter=useRef(null), seaReverb=useRef(null), seaReverbWet=useRef(null), shimmerSend=useRef(null), shimmerFilter=useRef(null), shimmerDelay=useRef(null), shimmerFeedback=useRef(null), shimmerWet=useRef(null), seaPan=useRef(null), seaPanLfo=useRef(null), masterRef=useRef(null), stepRef=useRef(-1);
  useEffect(()=>{patternRef.current=pattern},[pattern]);useEffect(()=>{bpmRef.current=bpm},[bpm]);useEffect(()=>{fxRef.current=fx; if(nodes.current){
  const t=ctx.current.currentTime,n=nodes.current;
  n.filter.frequency.setTargetAtTime(120+fx.filter/100*17880,t,.05);
- n.crusher.curve=makeBitcrush(fx.bitcrush);
- n.drive.curve=makeDrive(fx.drive);
+ if(n.lastBitcrush!==fx.bitcrush){n.crusher.curve=makeBitcrush(fx.bitcrush);n.lastBitcrush=fx.bitcrush;}
+ if(n.lastDrive!==fx.drive){n.drive.curve=makeDrive(fx.drive);n.lastDrive=fx.drive;}
  n.comp.threshold.setTargetAtTime(-8-(fx.compression/100)*8,t,.05);
  n.comp.ratio.setTargetAtTime(1+(fx.compression/100)*2,t,.05);
- n.rev.gain.setTargetAtTime(fx.reverb/100*.48,t,.05);
- n.delayGain.gain.setTargetAtTime(fx.delay/100*.34,t,.05);
- n.delay.delayTime.setTargetAtTime(delaySeconds(fx.delayNote,bpmRef.current),t,.05);
- n.feedback.gain.setTargetAtTime(fx.delayType==='analog'?.38:.18,t,.05);
- n.delayTone.frequency.setTargetAtTime(fx.delayType==='analog'?3200:16000,t,.05);
- n.revConv.buffer=makeReverbImpulse(ctx.current,fx.reverbType);;
+ n.springWet.gain.setTargetAtTime(fx.reverb/100*.24,t,.08);
+ n.springFeedback.gain.setTargetAtTime(.22+(fx.reverb/100)*.22,t,.08);
+ n.delayGain.gain.setTargetAtTime(fx.delay/100*.26,t,.08);
+ n.delay.delayTime.setTargetAtTime(delaySeconds(fx.delayNote,bpmRef.current),t,.08);
+ n.feedback.gain.setTargetAtTime(.16+(fx.delay/100)*.28,t,.08);
+ n.delayTone.frequency.setTargetAtTime(3400,t,.08);
  }} ,[fx,bpm]);
- const init=async()=>{if(ctx.current)return;const c=new (window.AudioContext||window.webkitAudioContext)();ctx.current=c;const input=c.createGain(),filter=c.createBiquadFilter(),crusher=c.createWaveShaper(),drive=c.createWaveShaper(),dry=c.createGain(),rev=c.createGain(),delay=c.createDelay(1),delayTone=c.createBiquadFilter(),revConv=c.createConvolver(),feedback=c.createGain(),delayGain=c.createGain(),comp=c.createDynamicsCompressor(),masterGain=c.createGain();
- filter.type='lowpass';filter.frequency.value=18000;crusher.curve=makeBitcrush(0);crusher.oversample='none';drive.curve=makeDrive(8);drive.oversample='4x';dry.gain.value=1;rev.gain.value=0;revConv.buffer=makeReverbImpulse(c,fxRef.current.reverbType);delay.delayTime.value=delaySeconds(fxRef.current.delayNote,bpmRef.current);delayTone.type='lowpass';delayTone.frequency.value=12000;delayTone.Q.value=.2;feedback.gain.value=.12;delayGain.gain.value=0;comp.threshold.value=-12;comp.ratio.value=2;comp.knee.value=18;comp.attack.value=.003;comp.release.value=.18;masterGain.gain.value=master/100;
+ const init=async()=>{if(ctx.current)return;const c=new (window.AudioContext||window.webkitAudioContext)();ctx.current=c;const input=c.createGain(),filter=c.createBiquadFilter(),crusher=c.createWaveShaper(),drive=c.createWaveShaper(),dry=c.createGain(),springDelay=c.createDelay(.08),springTone=c.createBiquadFilter(),springFeedback=c.createGain(),springWet=c.createGain(),delay=c.createDelay(1),delayTone=c.createBiquadFilter(),feedback=c.createGain(),delayGain=c.createGain(),comp=c.createDynamicsCompressor(),masterGain=c.createGain();
+ filter.type='lowpass';filter.frequency.value=18000;crusher.curve=makeBitcrush(0);crusher.oversample='none';drive.curve=makeDrive(8);drive.oversample='2x';dry.gain.value=1;springDelay.delayTime.value=.031;springTone.type='bandpass';springTone.frequency.value=1450;springTone.Q.value=1.15;springFeedback.gain.value=.22;springWet.gain.value=0;delay.delayTime.value=delaySeconds(fxRef.current.delayNote,bpmRef.current);delayTone.type='lowpass';delayTone.frequency.value=3400;delayTone.Q.value=.35;feedback.gain.value=.16;delayGain.gain.value=0;comp.threshold.value=-12;comp.ratio.value=2;comp.knee.value=18;comp.attack.value=.003;comp.release.value=.18;masterGain.gain.value=master/100;
  // Clear signal flow: input → tone → bit depth → gentle saturation → dry/space sends → compressor → master.
  input.connect(filter);filter.connect(crusher);crusher.connect(drive);
  drive.connect(dry);dry.connect(comp);
- drive.connect(revConv);revConv.connect(rev);rev.connect(comp);
+ drive.connect(springDelay);springDelay.connect(springTone);springTone.connect(springFeedback);springFeedback.connect(springDelay);springTone.connect(springWet);springWet.connect(comp);
  drive.connect(delay);delay.connect(delayTone);delayTone.connect(feedback);feedback.connect(delay);delayTone.connect(delayGain);delayGain.connect(comp);
  comp.connect(masterGain);masterGain.connect(c.destination);
- nodes.current={input,filter,crusher,drive,dry,rev,revConv,delay,delayTone,feedback,delayGain,comp,masterGain};
+ nodes.current={input,filter,crusher,drive,dry,springDelay,springTone,springFeedback,springWet,delay,delayTone,feedback,delayGain,comp,masterGain,lastBitcrush:0,lastDrive:8};
  // Dedicated sea-atmosphere chain: softened source, diffuse reverb, filtered shimmer echoes and slow stereo drift.
  const ambOut=c.createGain(),seaTone=c.createBiquadFilter(),seaPanNode=c.createStereoPanner(),seaVerb=c.createConvolver(),seaVerbWet=c.createGain(),seaVerbDry=c.createGain();
  seaTone.type='lowpass';seaTone.frequency.value=2300;seaTone.Q.value=.55;seaPanNode.pan.value=0;
@@ -78,31 +78,11 @@ function App(){
  };
  const ensure=async()=>{await init();if(ctx.current.state==='suspended')await ctx.current.resume()};
  function delaySeconds(note,tempo){const beats=note==='1/4'?1:note==='1/8'?.5:note==='1/16'?.25:note==='1/32'?.125:1;return Math.max(.03,Math.min(1.5,(60/tempo)*beats))}
- function makeReverbImpulse(c,type){
- const seconds=type==='spring'?1.75:1.25;
- const decay=type==='spring'?3.15:4.6;
- const len=Math.floor(c.sampleRate*seconds),b=c.createBuffer(2,len,c.sampleRate);
- const taps=type==='room'?[.008,.017,.029,.043,.061]:[.014,.031,.052,.079,.113,.151];
- for(let ch=0;ch<2;ch++){
-  const d=b.getChannelData(ch);
-  for(let i=0;i<len;i++){
-   const t=i/c.sampleRate,env=Math.pow(Math.max(0,1-t/seconds),decay);
-   let early=0;
-   for(let k=0;k<taps.length;k++){
-    const offset=Math.floor(taps[k]*c.sampleRate)+(ch?Math.floor(k*13):0);
-    if(Math.abs(i-offset)<3) early+=(1-Math.abs(i-offset)/3)*(type==='room'?.24:.12)*(1-k/taps.length);
-   }
-   let body=Math.random()*2-1;
-   if(type==='spring') body=(body*.56+Math.sin(i*.047+Math.sin(i*.0007)*2)*.34+Math.sin(i*.091)*.10);
-   d[i]=(body*env+early)*(type==='spring'?.36:.32);
-  }
- }
- return b;
-}
+
 function makeDrive(amount){const n=44100,curve=new Float32Array(n),k=1+amount*0.045;for(let i=0;i<n;i++){const x=i*2/n-1;curve[i]=Math.tanh(k*x)/Math.tanh(k)}return curve}
  function makeBitcrush(amount){const n=65536,curve=new Float32Array(n),bits=Math.round(16-(amount/100)*6),levels=Math.pow(2,bits-1),mix=amount/100*.55;for(let i=0;i<n;i++){const x=i*2/n-1,q=Math.round(x*levels)/levels;curve[i]=x*(1-mix)+q*mix}return curve}
- const playSample=async(file,vel=1,when=null)=>{await ensure();const c=ctx.current,b=buffers.current[file.id];if(!b)return;const src=c.createBufferSource(),g=c.createGain();src.buffer=b;src.detune.value=fxRef.current.pitch*100;g.gain.value=vel;src.connect(g);g.connect(nodes.current.input);src.start(when??c.currentTime)};
- const triggerRow=(row,when)=>{const chosen=files.find(f=>f.id===row.sampleId)||pick(row.kind||'Wood');const b=buffers.current[chosen.id];if(!b)return;const c=ctx.current,src=c.createBufferSource(),g=c.createGain(),pan=c.createStereoPanner();src.buffer=b;src.detune.value=fxRef.current.pitch*100;g.gain.value=(volume[row.index]||78)/100;pan.pan.value=row.index%2?0.12:-0.12;src.connect(g);g.connect(pan);pan.connect(nodes.current.input);src.start(when)};
+ const playSample=async(file,vel=1,when=null)=>{await ensure();const c=ctx.current,b=buffers.current[file.id];if(!b)return;const src=c.createBufferSource(),g=c.createGain();src.buffer=b;src.detune.value=fxRef.current.pitch;g.gain.value=vel;src.connect(g);g.connect(nodes.current.input);src.start(when??c.currentTime)};
+ const triggerRow=(row,when)=>{const chosen=files.find(f=>f.id===row.sampleId)||pick(row.kind||'Wood');const b=buffers.current[chosen.id];if(!b)return;const c=ctx.current,src=c.createBufferSource(),g=c.createGain(),pan=c.createStereoPanner();src.buffer=b;src.detune.value=fxRef.current.pitch;g.gain.value=(volume[row.index]||78)/100;pan.pan.value=row.index%2?0.12:-0.12;src.connect(g);g.connect(pan);pan.connect(nodes.current.input);src.start(when)};
  const [rows,setRows]=useState(()=>{const kinds=['Kick','Kick','Snap','Hat','Hat','Shaker','Shell','Wood','Scrape','Metal','Metal','Stone','Glass','Plastic','Texture','Shaker'];return kinds.map((k,i)=>({index:i,name:padNames[i],kind:k,sampleId:pick(k,i).id}))});
  const rowsRef=useRef(rows);
  const commitRows=(nextRows)=>{rowsRef.current=nextRows;setRows(nextRows)};
@@ -143,7 +123,7 @@ function makeDrive(amount){const n=44100,curve=new Float32Array(n),k=1+amount*0.
  useEffect(()=>{if(!ctx.current)return;const t=ctx.current.currentTime;if(seaGain.current)seaGain.current.gain.setTargetAtTime(seaLevel/100*.55,t,.12);if(seaFilter.current)seaFilter.current.frequency.setTargetAtTime(700+seaMist*38,t,.18);if(seaReverbWet.current)seaReverbWet.current.gain.setTargetAtTime(.12+(seaMist/100)*.72,t,.18);if(shimmerWet.current)shimmerWet.current.gain.setTargetAtTime((shimmer/100)*.42,t,.12);if(shimmerFeedback.current)shimmerFeedback.current.gain.setTargetAtTime(.12+(shimmer/100)*.34,t,.12);if(shimmerFilter.current)shimmerFilter.current.frequency.setTargetAtTime(1800+shimmer*58,t,.15);},[seaLevel,seaMist,shimmer]);
  return <div className="app"><div className="cover"/><header><div className="brand"><Waves size={19}/><span>REDOWAN'S SEASHORE FINDS</span><i>GENERATIVE PERCUSSION</i></div><div className="header-right"><span className="live-dot"/> BROWSER INSTRUMENT <span className="version">V 1.0</span></div></header>
  <main><section className="hero"><div><p className="eyebrow">FIELD-RECORDED OBJECTS · RHYTHMIC EXPERIMENTS</p><h1>Redowan's<br/><em>sea shore findings.</em></h1><p className="intro">A living percussion instrument built from driftwood, shells, glass, stone and the small sounds left behind by the tide.</p></div><div className="hero-note"><span>01 / 54</span><small>FOUND SOUNDS<br/>FROM THE SHORE</small></div></section>
- <section className="transport panel"><div className="transport-left"><button className={'play '+(playing?'active':'')} onClick={playing?stop:start}>{playing?<Square size={16}/>:<Play size={16} fill="currentColor"/>}{playing?'STOP':'PLAY'}</button><button className="random" onClick={shufflePattern}><Shuffle size={15}/> SHUFFLE PATTERN</button><button className="random" onClick={shuffleSounds}><Waves size={15}/> SHUFFLE SOUNDS</button><div className="pitch-control"><label>MASTER PITCH <b>{fx.pitch>0?"+":""}{fx.pitch} st</b></label><input aria-label="Master pitch" type="range" min="-12" max="12" step="1" value={fx.pitch} onChange={e=>setFx({...fx,pitch:+e.target.value})}/></div></div><div className="tempo"><label>TEMPO</label><strong>{bpm}</strong><span>BPM</span><input aria-label="Tempo" type="range" min="60" max="190" value={bpm} onChange={e=>setBpm(+e.target.value)}/></div><div className="genre"><label>RHYTHM WORLD</label><select value={genre} onChange={e=>changeGenre(e.target.value)}>{genres.map(g=><option key={g}>{g}</option>)}</select></div></section>
+ <section className="transport panel"><div className="transport-left"><button className={'play '+(playing?'active':'')} onClick={playing?stop:start}>{playing?<Square size={16}/>:<Play size={16} fill="currentColor"/>}{playing?'STOP':'PLAY'}</button><button className="random" onClick={shufflePattern}><Shuffle size={15}/> SHUFFLE PATTERN</button><button className="random" onClick={shuffleSounds}><Waves size={15}/> SHUFFLE SOUNDS</button><div className="pitch-control"><label>MASTER PITCH <b>{fx.pitch>0?"+":""}{fx.pitch} ct</b></label><input className="pitch-range" aria-label="Master pitch" type="range" min="-1200" max="1200" step="1" value={fx.pitch} style={{background:fx.pitch===0?"linear-gradient(to right,#ffffff22 0%,#ffffff22 49.6%,#efcfd0 49.6%,#efcfd0 50.4%,#ffffff22 50.4%,#ffffff22 100%)":fx.pitch>0?`linear-gradient(to right,#ffffff22 0%,#ffffff22 49.6%,#efcfd0 49.6%,#efcfd0 50.4%,#ffffff22 50.4%,#ffffff22 100%),linear-gradient(to right,transparent 50%,#70aaa8 50%,#70aaa8 ${50+fx.pitch/24}%,transparent ${50+fx.pitch/24}%)`:`linear-gradient(to right,#ffffff22 0%,#ffffff22 49.6%,#efcfd0 49.6%,#efcfd0 50.4%,#ffffff22 50.4%,#ffffff22 100%),linear-gradient(to right,transparent ${50+fx.pitch/24}%,#70aaa8 ${50+fx.pitch/24}%,#70aaa8 50%,transparent 50%)`}} onChange={e=>setFx({...fx,pitch:+e.target.value})}/></div></div><div className="tempo"><label>TEMPO</label><strong>{bpm}</strong><span>BPM</span><input aria-label="Tempo" type="range" min="60" max="190" value={bpm} onChange={e=>setBpm(+e.target.value)}/></div><div className="genre"><label>RHYTHM WORLD</label><select value={genre} onChange={e=>changeGenre(e.target.value)}>{genres.map(g=><option key={g}>{g}</option>)}</select></div></section>
  <section className="sequencer panel"><div className="section-head"><div><p className="eyebrow">01 — PATTERN GENERATOR</p><h2>Shoreline sequence</h2></div><span className="steps-label">16 STEPS · 4 BARS OF MOTION</span></div><div className="grid-wrap"><div className="step-head"><div className="track-label">VOICE</div>{Array.from({length:16},(_,i)=><div key={i} className={'step-num '+(i%4===0?'bar':'')}>{i+1}</div>)}</div>{rows.map((row,r)=><div className="track" key={r}><button className={'track-label '+(selected===r?'chosen':'')} onClick={()=>setSelected(r)}><span className="track-name">{voiceLabel(row)}</span><small>{files.find(f=>f.id===row.sampleId)?.material||row.kind}</small></button>{pattern[r].map((on,s)=><button key={s} aria-label={`${voiceLabel(row)} step ${s+1}`} onClick={()=>toggle(r,s)} className={`cell ${on?'on':''} ${s%4===0?'bar':''} ${step===s&&playing?'current':''}`}/>)}</div>)}</div><div className="sequencer-foot"><span><i className="legend-on"/> ACTIVE STEP</span><span>CLICK ANY CELL TO EDIT</span><span>SWING <b>{swing}%</b> <input type="range" min="0" max="60" value={swing} onChange={e=>setSwing(+e.target.value)}/></span></div></section>
  <section className="lower"><div className="panel sounds"><div className="section-head"><div><p className="eyebrow">02 — FOUND OBJECTS</p><h2>Sample collection</h2></div><span className="count">54 SOUNDS</span></div><div className="pads">{rows.map((row,i)=>{const sample=files.find(f=>f.id===row.sampleId)||files[0];return <div key={i} className={'pad '+(selected===i?'selected':'')}><button type="button" className="pad-audition" onClick={()=>{setSelected(i);playSample(sample)}} aria-label={`Audition ${sample.name}`}><span className="pad-no">{String(i+1).padStart(2,'0')}</span><span className="pad-title">{sample.name}</span><span className="pad-type">{row.name} · SAMPLE {String(sample.id+1).padStart(2,'0')}</span></button><select className="pad-select" aria-label={`Choose sample for ${row.name}`} value={row.sampleId} onChange={e=>{choosePadSample(i,e.target.value);setSelected(i)}}>{files.map(f=><option key={f.id} value={f.id}>{f.name} · {f.material}</option>)}</select></div>})}</div><p className="hint">Tap a pad to audition. Use its sample menu to load any sound from the collection into that voice.</p>
  <details className="library-browser"><summary><span>Browse sample library</span><small>54 recordings · materials &amp; source objects</small></summary><div className="library-list">{files.map(f=><div className="library-item" key={f.id}><div><b>{String(f.id+1).padStart(2,'0')} · {f.name}</b><small>{f.material} <span>—</span> {f.kind}</small></div><button type="button" onClick={()=>playSample(f)} aria-label={`Preview ${f.name}`}><Play size={12} fill="currentColor"/> Preview</button></div>)}</div></details></div>
@@ -157,11 +137,11 @@ function makeDrive(amount){const n=44100,curve=new Float32Array(n),k=1+amount*0.
   <div className="fx-control"><div><span>LOW-PASS FILTER</span><b>{fx.filter}%</b></div><input className="wide-slider" type="range" min="0" max="100" value={fx.filter} onChange={e=>setFx({...fx,filter:+e.target.value})}/></div>
   </div></div>
   <div className="dsp-group"><div className="dsp-group-title">REVERB</div>
-  <div className="fx-control"><div><span>TYPE</span></div><select className="dsp-select" value={fx.reverbType} onChange={e=>setFx({...fx,reverbType:e.target.value})}><option value="room">Room</option><option value="spring">Spring</option></select></div>
+  <div className="fx-control"><div><span>TYPE</span></div><select className="dsp-select" value={fx.reverbType} onChange={e=>setFx({...fx,reverbType:e.target.value})}><option value="spring">Spring</option></select></div>
   <div className="fx-control"><div><span>AMOUNT</span><b>{fx.reverb}%</b></div><input className="wide-slider" type="range" min="0" max="100" value={fx.reverb} onChange={e=>setFx({...fx,reverb:+e.target.value})}/></div>
   </div>
   <div className="dsp-group"><div className="dsp-group-title">DELAY</div>
-  <div className="fx-control"><div><span>TYPE</span></div><select className="dsp-select" value={fx.delayType} onChange={e=>setFx({...fx,delayType:e.target.value})}><option value="digital">Digital</option><option value="analog">Analog</option></select></div>
+  <div className="fx-control"><div><span>TYPE</span></div><select className="dsp-select" value={fx.delayType} onChange={e=>setFx({...fx,delayType:e.target.value})}><option value="analog">Analog</option></select></div>
   <div className="fx-control"><div><span>NOTE DIVISION</span></div><select className="dsp-select" value={fx.delayNote} onChange={e=>setFx({...fx,delayNote:e.target.value})}><option>1/4</option><option>1/8</option><option>1/16</option><option>1/32</option></select></div>
   <div className="fx-control"><div><span>AMOUNT</span><b>{fx.delay}%</b></div><input className="wide-slider" type="range" min="0" max="100" value={fx.delay} onChange={e=>setFx({...fx,delay:+e.target.value})}/></div>
   </div>

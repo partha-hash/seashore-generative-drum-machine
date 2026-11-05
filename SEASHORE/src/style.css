@@ -143,3 +143,8 @@ main { width:100%; }
 .dsp-controls .wide-slider{margin-top:5px}
 @media(max-width:760px){.pitch-control{width:125px;min-width:105px}.transport{gap:14px}.transport-left{gap:7px}}
 @media(max-width:620px){.pitch-control{width:100%;min-width:0;grid-column:1/-1}.transport-left{flex-wrap:wrap}.transport-left .random{min-width:0}.dsp-basic-grid{grid-template-columns:1fr}}
+
+/* Center-zero master pitch control: neutral at 0 cents, bipolar movement. */
+.pitch-control .pitch-range{appearance:none;-webkit-appearance:none;width:100%;height:7px;border-radius:99px;border:1px solid #96c1c855;outline:none;margin:4px 0;}
+.pitch-control .pitch-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:#96c1c8;border:1px solid #d5e8e5;box-shadow:0 1px 4px #102d3b88;}
+.pitch-control .pitch-range::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#96c1c8;border:1px solid #d5e8e5;box-shadow:0 1px 4px #102d3b88;}
