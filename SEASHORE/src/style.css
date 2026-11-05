@@ -15,3 +15,4 @@
 .pad.selected{border-color:#efcfd0;background:#315d70}
 .wide-slider,input[type=range]{accent-color:#70aaa8}
 ::selection{background:#70aaa8;color:#173746}
+.sea-toggle{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border:1px solid #96c1c866;border-radius:4px;background:#244c5b;color:#96c1c8;cursor:pointer;transition:background .18s,border-color .18s,color .18s,box-shadow .18s}.sea-toggle:hover{filter:brightness(1.15)}.sea-toggle.is-playing{background:#96c1c8;border-color:#96c1c8;color:#173746;box-shadow:0 0 16px #96c1c844}
