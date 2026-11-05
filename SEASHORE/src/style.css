@@ -114,3 +114,14 @@ main { width:100%; }
   .pad-select { font-size:7px; }
   .sequencer-foot { align-items:flex-start; }
 }
+
+/* Professional, ordered master DSP rack */
+.dsp-chain{display:grid;gap:14px}
+.dsp-group{padding:12px 13px 13px;border:1px solid #96c1c833;border-radius:5px;background:#17374645;min-width:0}
+.dsp-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:9px;margin-bottom:2px;border-bottom:1px solid #ffffff18;color:#efcfd0;font:9px 'DM Mono';letter-spacing:.13em}
+.dsp-group-head small{color:#91b4b9;font:8px 'DM Mono';letter-spacing:.08em;text-align:right}
+.dsp-group .fx-control{margin-top:12px}
+.dsp-group .fx-control:first-of-type{margin-top:10px}
+.range-ends{display:flex;justify-content:space-between;color:#91b4b9;font:8px 'DM Mono';margin-top:3px}
+.effects .fx-note{line-height:1.55}
+@media(max-width:620px){.dsp-group{padding:11px}.dsp-group-head{align-items:flex-start}.dsp-group-head small{max-width:48%}}
