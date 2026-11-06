@@ -148,3 +148,31 @@ main { width:100%; }
 .pitch-control .pitch-range{appearance:none;-webkit-appearance:none;width:100%;height:7px;border-radius:99px;border:1px solid #96c1c855;outline:none;margin:4px 0;}
 .pitch-control .pitch-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:#96c1c8;border:1px solid #d5e8e5;box-shadow:0 1px 4px #102d3b88;}
 .pitch-control .pitch-range::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#96c1c8;border:1px solid #d5e8e5;box-shadow:0 1px 4px #102d3b88;}
+
+/* Materials & Instruments: two-column controls + collapsible field-journal panel */
+.transport{flex-wrap:wrap}
+.transport-left{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:340px;flex:0 0 auto;align-items:stretch}
+.transport-left .play,.transport-left .random{height:44px;min-width:0;width:100%;text-align:center;line-height:1.15;padding:0 8px}
+.materials-btn{gap:7px}
+.materials-btn span{white-space:normal}
+.materials-btn .chev{flex:none;opacity:.7;transition:transform .25s}
+.materials-btn.open .chev{transform:rotate(180deg)}
+.transport-left .pitch-control{grid-column:1/-1;width:100%}
+.materials-panel{flex:1 0 100%;display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.materials-panel.open{grid-template-rows:1fr}
+.materials-inner{overflow:hidden;min-height:0}
+.materials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;padding-top:14px;margin-top:6px;border-top:1px solid #ffffff17}
+.mat{margin:0;background:#244c5b;border:1px solid #96c1c830;border-radius:4px;overflow:hidden}
+.mat img,.mat-ph{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#2d5666}
+.mat-ph{display:flex;align-items:center;justify-content:center;color:#96c1c8aa;background:linear-gradient(160deg,#cdbf9f33,#2d5666)}
+.mat figcaption{padding:10px 12px 13px}
+.mat b{font:9px 'DM Mono';letter-spacing:.14em;color:#efcfd0;font-weight:400}
+.mat p{margin:7px 0 0;font:italic 13px/1.55 'Playfair Display',serif;color:#d4e2e1}
+@media(max-width:620px){.transport-left{width:100%}.transport-left .play,.transport-left .random{font-size:9px;letter-spacing:.06em}.materials-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.materials-panel,.materials-btn .chev{transition:none}}
+/* Shuffle/Materials fix: no phantom row-gap when the Materials panel is collapsed */
+.transport{column-gap:34px;row-gap:14px}
+.materials-panel{margin-top:-14px}
+.materials-panel.open{margin-top:0}
+.transport-left .random,.transport-left .play{box-sizing:border-box;flex:none}
+@media(max-width:760px){.transport{column-gap:14px}}
