@@ -181,3 +181,9 @@ main { width:100%; }
 .clear-btn:hover:not(:disabled){filter:brightness(1.13);background:#efcfd01a}
 .clear-btn:disabled{opacity:.4;cursor:default}
 @media(max-width:620px){.sequencer-actions .clear-btn{width:100%}}
+
+/* Tribute note */
+.materials-note{padding:14px 2px 4px;border-top:1px solid #ffffff17;margin-top:6px;max-width:68ch}
+.materials-note h3{margin:0 0 8px;font:10px 'DM Mono';letter-spacing:.16em;font-weight:400;color:#efcfd0}
+.materials-note p{margin:0;font:italic 14px/1.7 'Playfair Display',serif;color:#d4e2e1}
+.materials-note+.materials-grid{border-top:0;margin-top:0}
