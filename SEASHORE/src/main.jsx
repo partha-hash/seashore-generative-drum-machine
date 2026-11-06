@@ -130,7 +130,7 @@ function makeDrive(amount){const n=44100,curve=new Float32Array(n),k=1+amount*0.
  const stop=()=>{playingRef.current=false;setPlaying(false);setStep(-1);clearTimeout(timer.current)};
  useEffect(()=>()=>{stop();if(seaSource.current){try{seaSource.current.stop()}catch{}}ctx.current?.close()},[]);
  const clearPattern=()=>setPattern(old=>old.map(row=>row.map(()=>false)));
- const toggle=(r,s)=>setPattern(old=>old.map((row,i)=>row.map((v,j)=>i===r&&j===s?!v:v)));
+ const toggle=async(r,s)=>{const turningOn=!patternRef.current[r]?.[s];setPattern(old=>old.map((row,i)=>row.map((v,j)=>i===r&&j===s?!v:v)));if(!turningOn)return;try{await ensure();const row=rowsRef.current[r];if(row)triggerRow(row,ctx.current.currentTime)}catch(e){console.warn('Preview failed',e)}};
  const stopSea=()=>{seaPlayingRef.current=false;setSeaPlaying(false);if(seaSource.current){try{seaSource.current.stop()}catch{}seaSource.current=null;}if(seaGain.current){try{seaGain.current.disconnect()}catch{}seaGain.current=null;}};
  const startSea=()=>{if(!ctx.current||!seaRef.current||seaPlayingRef.current)return;const c=ctx.current,src=c.createBufferSource(),gain=c.createGain();src.buffer=seaRef.current;src.loop=true;gain.gain.value=seaLevel/100*.55;src.connect(gain);gain.connect(ambienceOut.current||nodes.current.masterGain);if(shimmerSend.current)gain.connect(shimmerSend.current);src.start();seaSource.current=src;seaGain.current=gain;seaPlayingRef.current=true;setSeaPlaying(true);};
  const toggleSea=async()=>{if(seaPlayingRef.current){stopSea();return;}await ensure();if(!seaRef.current){console.warn('Sea ambience is not available');return;}startSea();};
