@@ -174,3 +174,10 @@ main { width:100%; }
 .materials-panel{margin-top:-14px}
 .materials-panel.open{margin-top:0}
 @media(max-width:760px){.transport{column-gap:14px}}
+
+/* Clear pattern action */
+.sequencer-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.clear-btn{height:40px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 16px;border:1px solid #efcfd066;background:transparent;color:#efcfd0;border-radius:4px;font:10px 'DM Mono';letter-spacing:.1em;cursor:pointer}
+.clear-btn:hover:not(:disabled){filter:brightness(1.13);background:#efcfd01a}
+.clear-btn:disabled{opacity:.4;cursor:default}
+@media(max-width:620px){.sequencer-actions .clear-btn{width:100%}}
